@@ -1,0 +1,75 @@
+
+Devices:
+(
+    { name="123", type="TM", timeout="3000", id=0 },
+    { name="410596083", type="PLC", id=1 },
+    { name="410590003", type="PLC", timeout="5000", id=2 }, #базовый модем
+    { name="368", type="MKS", timeout="10000", id=3 }
+);
+
+LocalPLCGate=2; # id базового plc-модема
+ConnectPLCGate="connect";
+# LocalGSMGate=  -- в данной конфигурации не используется 
+# ConnectGSMGate=  -- в данной конфигурации не используется
+
+# Сеть выполнена с единичным уровнем ввложенности
+# Устройство с id=0, подключено через устройство с id=2.
+# То есть на прямую.
+# Устройство с id=3, подключено через устройство с id=1.
+# При обращении к устройству id=3, вначале ппроизводится соединение id=1 с id=2
+Network:
+{
+    [ 2, 0 ],
+    [ 1, 3 ]
+};
+
+Tasks:
+(
+    {
+        # Считать показания со счётчиков
+        id=0;
+        TM: ( "tm_profile: get_lost", "tm_energy: 1 2" );
+        MKS: ( "mks_energy: now" );
+    },
+    {
+        # произвести синхронизацию
+        id=1;
+        MKS: ( "mks_sync: now" );
+    },
+    {
+        # Создать отчёты
+        All: ( "dfl: 123", "couterTMTA: 123" );
+    }
+);
+
+Port:
+{
+    file = "/dev/ttyS1";
+    speed = "9600";
+    dbits = "8";
+    sbits = "1";
+    parity = "no";
+};
+
+Log:
+{
+    file = "/home/axard/workspace/Repos/askue-repo/askue/src/askue.log";
+    # режим работы
+    # 'a' - добавление к конец
+    # 'w' - перезапись при запуске АСКУЭ
+    mode = "w";
+    lines = "10";
+};
+
+Journal:
+{
+    file = "/home/axard/workspace/Repos/askue-repo/askue/src/askue.db.sqlite3";
+    # число дней для хранения событий, показаний и т.д.
+    # по умолчанию 3 дня
+    size = "10"; 
+    # кол-во дней для ретроспективы в поисках пропусков
+    # по умолчанию 0 дней
+    flashback = "5";
+};
+
+
