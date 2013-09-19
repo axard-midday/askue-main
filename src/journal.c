@@ -62,13 +62,14 @@ int __init_tbl ( sqlite3 *DB, const char *TblReq, const char *IdReq, __init_func
  * Запросы на создание таблиц
  */
 // таблица показаний
-#define SQL_MAKE_REG_TBL "CREATE TABLE IF NOT EXISTS reg_tbl ( cnt integer, value real, type text, date text, time text );"
+#define SQL_MAKE_REG_TBL "CREATE TABLE IF NOT EXISTS reg_tbl "\
+        "( Device integer, BValue integer, EValue integer, Type text, Date text, Time text );"
 
 /*
  * Запросы на создание индексов
  */
 // индекс таблицы показаний
-#define SQL_MAKE_REG_ID "CREATE UNIQUE INDEX IF NOT EXISTS reg_id ON reg_tbl ( cnt, type, date, time );"
+#define SQL_MAKE_REG_ID "CREATE UNIQUE INDEX IF NOT EXISTS reg_id ON reg_tbl ( Device, Type, Date, Time );"
 
 /*                Точка первоначальной настройки базы                 */
 int askue_journal_init ( const journal_cfg_t *JCfg, FILE *Log, int Verbose )
@@ -104,7 +105,7 @@ int askue_journal_init ( const journal_cfg_t *JCfg, FILE *Log, int Verbose )
 
 #undef SQL_MAKE_CNT_TBL
 
-#define SQL_STIFLE_JOURNAL "DELETE FROM reg_tbl WHERE date < ( SELECT DATE ( 'now', '-%u day' ) );"
+#define SQL_STIFLE_JOURNAL "DELETE FROM reg_tbl WHERE Date < ( SELECT DATE ( 'now', '-%u day' ) );"
 
 int askue_journal_stifle ( const journal_cfg_t *JCfg, FILE *Log, int Verbose )
 {
